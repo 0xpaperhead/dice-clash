@@ -7,7 +7,7 @@ import { SolanaProvider } from "@/components/solana-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Dicehead",
+  title: "Dice Clash",
   description: "A fast-paced prediction dice game",
     generator: 'v0.dev'
 }

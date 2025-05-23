@@ -103,7 +103,7 @@ export default function GameContainer({ initialBalance }: GameContainerProps) {
     <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-white">Dicehead</h1>
+          <h1 className="text-2xl font-bold text-white">Dice Clash</h1>
           <div className="flex items-center gap-2">
             <div className="bg-gray-700 px-4 py-2 rounded-lg">
               <span className="text-gray-300 text-sm">Balance:</span>{" "}

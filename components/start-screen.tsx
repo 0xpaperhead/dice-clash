@@ -17,7 +17,7 @@ export default function StartScreen({ onStartGame }: StartScreenProps) {
         <div className="flex justify-center mb-4">
           <Dice5 className="h-20 w-20 text-yellow-400" />
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Welcome to Dicehead!</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">Welcome to Dice Clash!</h2>
         <p className="text-gray-300 mb-4">Predict if the dice roll will be over 4 or under 3.</p>
         <div className="bg-gray-700 p-4 rounded-lg text-sm text-gray-300 mb-4">
           <p className="mb-2">

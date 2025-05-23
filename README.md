@@ -1,12 +1,12 @@
-# 🎲 Dicehead
+# 🎲 Dice Clash
 
 A Solana-powered dice betting game where players predict dice roll outcomes and can fund their gameplay using their connected Solana wallet.
 
-![Dicehead Game Preview](https://via.placeholder.com/800x400/1f2937/facc15?text=Dicehead+Game)
+![Dice Clash Game Preview](https://via.placeholder.com/800x400/1f2937/facc15?text=Dice Clash+Game)
 
 ## 🎯 About
 
-Dicehead is an interactive web-based dice game that combines traditional gaming with modern blockchain technology. Players can:
+Dice Clash is an interactive web-based dice game that combines traditional gaming with modern blockchain technology. Players can:
 
 - 🎲 Predict whether a dice roll will be **over 4** or **under 3**
 - 💰 Bet with in-game currency and win 1.8x their bet amount
@@ -56,7 +56,7 @@ Dicehead is an interactive web-based dice game that combines traditional gaming 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd dicehead
+   cd Dice Clash
    ```
 
 2. **Install dependencies**
@@ -106,7 +106,7 @@ pnpm start
 ## 📁 Project Structure
 
 ```
-dicehead/
+Dice Clash/
 ├── app/                    # Next.js app router
 │   ├── api/               # API routes
 │   ├── layout.tsx         # Root layout

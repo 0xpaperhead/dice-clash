@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { PublicKey } from "@solana/web3.js"
 import * as nacl from "tweetnacl"
 import { SignJWT } from "jose"
-import { CHALLENGES } from "../challenge/route"
+import { redis } from "@/lib/server-utils"
 
 // Get JWT secret from environment variable
 const getJwtSecret = () => {
@@ -26,19 +26,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Retrieve the challenge
-    const challenge = CHALLENGES[challengeId]
+    const challenge = await redis.get(challengeId)
     if (!challenge) {
       return NextResponse.json({ error: "Challenge not found or expired" }, { status: 400 })
     }
 
+    // Clean up the used challenge
+    await redis.del(challengeId)
+
+    const challengeData = JSON.parse(challenge)
+
     // Verify the public key matches the one that requested the challenge
-    if (challenge.publicKey !== publicKey) {
+    if (challengeData.publicKey !== publicKey) {
       return NextResponse.json({ error: "Public key mismatch" }, { status: 400 })
     }
 
     // Verify the signature
     try {
-      const messageBytes = new TextEncoder().encode(challenge.message)
+      const messageBytes = new TextEncoder().encode(challengeData.challenge)
       const signatureBytes = Buffer.from(signature, "base64")
       const publicKeyBytes = new PublicKey(publicKey).toBytes()
 
@@ -52,8 +57,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Signature verification failed" }, { status: 401 })
     }
 
-    // Clean up the used challenge
-    delete CHALLENGES[challengeId]
+        
 
     try {
       // Get JWT secret

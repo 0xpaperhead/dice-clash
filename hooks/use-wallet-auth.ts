@@ -94,19 +94,19 @@ export function useWalletAuth() {
         throw new Error(errorData.error || "Failed to generate challenge")
       }
 
-      const { challengeId, message } = await challengeResponse.json()
-      console.log("Challenge received:", { challengeId, message })
+      const { challengeId, challenge } = await challengeResponse.json()
+      console.log("Challenge received:", { challengeId, challenge })
 
       // Step 2: Sign the challenge message
       console.log("Signing challenge message...")
-      const messageUint8 = new TextEncoder().encode(message)
+      const messageUint8 = new TextEncoder().encode(challenge)
 
       let signature: Uint8Array
       try {
         signature = await signMessage(messageUint8)
-        console.log("Message signed successfully")
+        console.log("Challenge signed successfully")
       } catch (signError) {
-        console.error("Error signing message:", signError)
+        console.error("Error signing challenge:", signError)
         throw new Error(
           signError instanceof Error
             ? signError.message

@@ -1,11 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { nanoid } from "nanoid"
-
-// In-memory store for challenges (in production, use Redis or similar)
-const CHALLENGES: Record<string, { message: string; publicKey: string; createdAt: number }> = {}
+import * as nacl from "tweetnacl"
+import { redis } from "@/lib/server-utils"
 
 // Challenge expiration time (5 minutes)
-const CHALLENGE_EXPIRATION = 5 * 60 * 1000
+const CHALLENGE_EXPIRATION = 5 * 60 // in seconds
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,32 +16,22 @@ export async function POST(request: NextRequest) {
 
     // Generate a unique challenge message
     const challengeId = nanoid()
-    const timestamp = Date.now()
-    const message = `Sign this message to verify your wallet ownership: ${challengeId}`
+    const timestamp = Date.now().toString()
+    const challenge = Buffer.from(nacl.randomBytes(32)).toString("hex")
 
     // Store the challenge
-    CHALLENGES[challengeId] = {
-      message,
+    await redis.set(challengeId, JSON.stringify({
+      challenge,
       publicKey,
       createdAt: timestamp,
-    }
-
-    // Clean up expired challenges
-    Object.keys(CHALLENGES).forEach((id) => {
-      if (timestamp - CHALLENGES[id].createdAt > CHALLENGE_EXPIRATION) {
-        delete CHALLENGES[id]
-      }
-    })
+    }), CHALLENGE_EXPIRATION)
 
     return NextResponse.json({
       challengeId,
-      message,
+      challenge,
     })
   } catch (error) {
     console.error("Error generating challenge:", error)
     return NextResponse.json({ error: "Failed to generate challenge" }, { status: 500 })
   }
 }
-
-// Export the challenges for verification
-export { CHALLENGES }

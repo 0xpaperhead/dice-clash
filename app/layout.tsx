@@ -2,14 +2,14 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { SolanaProvider } from "@/components/solana-provider"
-
+// import { SolanaProvider } from "@/components/solana-provider" // Will be removed
+import CPrivyProvider from "@/providers/privy"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Dice Clash",
   description: "A fast-paced prediction dice game",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -20,7 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SolanaProvider>{children}</SolanaProvider>
+        <CPrivyProvider>
+          {/* <SolanaProvider>{children}</SolanaProvider> */} {/* Will be removed */}
+          {children} {/* Children directly under CPrivyProvider now */}
+        </CPrivyProvider>
       </body>
     </html>
   )

@@ -4,16 +4,19 @@ import { useState } from "react"
 import StartScreen from "./start-screen"
 import PredictionScreen from "./prediction-screen"
 import ResultScreen from "./result-screen"
-import WalletConnect from "./wallet-connect"
 import { GamePhase } from "@/lib/types"
-import { useWallet } from "@solana/wallet-adapter-react"
+import { useLogin, usePrivy, useIdentityToken, useLogout } from '@privy-io/react-auth';
 
 interface GameContainerProps {
   initialBalance: number
 }
 
 export default function GameContainer({ initialBalance }: GameContainerProps) {
-  const { connected } = useWallet()
+  const { ready, authenticated } = usePrivy();
+  const { login } = useLogin();
+  const { identityToken } = useIdentityToken();
+  const { logout } = useLogout();
+
   const [balance, setBalance] = useState(initialBalance)
   const [betAmount, setBetAmount] = useState(10)
   const [prediction, setPrediction] = useState<"over" | "under" | null>(null)
@@ -22,7 +25,6 @@ export default function GameContainer({ initialBalance }: GameContainerProps) {
   const [history, setHistory] = useState<
     Array<{ roll: number; prediction: string; result: string; amount: number; payout: number }>
   >([])
-  const [showWalletPanel, setShowWalletPanel] = useState(false)
 
   const handleStartGame = () => {
     setGamePhase(GamePhase.PREDICTION)
@@ -95,9 +97,33 @@ export default function GameContainer({ initialBalance }: GameContainerProps) {
     setBalance((prev) => prev + amount * 10) // Converting SOL to game tokens at 1:10 ratio
   }
 
-  const toggleWalletPanel = () => {
-    setShowWalletPanel(!showWalletPanel)
-  }
+  const handleVerifyUser = async () => {
+    if (!identityToken) {
+      console.error('Identity token not available.');
+      alert('Identity token not available. Please log in again.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/verify-user', {
+        headers: {
+          'Authorization': `Bearer ${identityToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log('User verified:', data);
+        alert(`User Verified: ${data.userId}`);
+      } else {
+        console.error('Verification failed:', data);
+        alert(`Verification Failed: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Error calling verify user API:', error);
+      alert('Error verifying user. See console for details.');
+    }
+  };
 
   return (
     <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
@@ -110,33 +136,32 @@ export default function GameContainer({ initialBalance }: GameContainerProps) {
               <span className="text-yellow-400 font-bold">${balance.toFixed(2)}</span>
             </div>
             <button
-              onClick={toggleWalletPanel}
-              className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 p-2 rounded-lg"
+              disabled={!ready}
+              onClick={() => {
+                if (authenticated) {
+                  logout();
+                } else {
+                  login({
+                    loginMethods: ['wallet'],
+                    walletChainType: 'solana-only',
+                    disableSignup: false
+                  });
+                }
+              }}
+              className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-4 py-2 rounded-lg disabled:opacity-50"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
-                <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
-                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
-              </svg>
+              {authenticated ? "Log Out" : "Log In"}
             </button>
+            {authenticated && identityToken && (
+              <button
+                onClick={handleVerifyUser}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg ml-2"
+              >
+                Verify User
+              </button>
+            )}
           </div>
         </div>
-
-        {showWalletPanel && (
-          <div className="mb-6">
-            <WalletConnect gameBalance={balance} onFundGame={handleFundGame} />
-          </div>
-        )}
 
         {gamePhase === GamePhase.START && <StartScreen onStartGame={handleStartGame} />}
 
